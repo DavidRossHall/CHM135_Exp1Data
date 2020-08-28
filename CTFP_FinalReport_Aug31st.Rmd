@@ -5,14 +5,19 @@ author: "David Hall and Dr. J. D'eon (supervisor)"
 date: "`r Sys.Date()`"
 output:
   tufte::tufte_handout:
+    extra_dependencies: ["float"]
     citation_package: natbib
     latex_engine: xelatex
   tufte::tufte_html: default
   tufte::tufte_book:
     citation_package: natbib
     latex_engine: xelatex
-bibliography: skeleton.bib
+bibliography: CTFP.bib
 link-citations: yes
+header-includes:
+  - \setcitestyle{numbers}
+  - \usepackage{float}
+  - \usepackage{amsmath}
 ---
 
 ```{r setup, include=FALSE}
@@ -20,46 +25,194 @@ library(tufte)
 # invalidate cache when the tufte version changes
 knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
 options(htmltools.dir.version = FALSE)
+
+library(tidyverse)
+library(ggpubr)
+library(ggpmisc)
+library(ggExtra)
+library(openxlsx)
+library(RcppRoll)
+library(cowplot)
+library(kableExtra)
+library(gridExtra)
 ```
 
 # Introduction
 
-* data analysis 
-  + import -> .csv to .xlsx
-  + tidy -> remove -999, view Dates, remove gaps in data
-  + transform -> OX calculation, summary statistics, potential for 8hr rolling average
-  + visualize -> time series and correlation plots
-  + communicate -> questions students awnsered. 
+Whether you like it or not, we are living in an increasingly data centric world, and the field of chemistry is no exception. An oft overlooked aspect of this is how exactly data (measurements, signals, etc) is transformed into information (trends, correlation) and finally into knowledge. Moreover, the explicit teaching of these concepsts is often neglected resulting in increasing student frustration.[@Schlotter2013] Motivated by this, and the need to transfer to a virtual laboratory environment as a result of Covid-19, we saught to develop a new experiment for *CHM 135: Physical Principles*. 
 
-# Source of Data
 
-* ECCC online
-  + hourly measurements
-* Weather Data
+*Experiment 1: The Chemistry of Air Quality* is the results of these efforts. In this new experiment first-year students are introduced to fundamental data analysis concepts as they explore some of the chemistry of airborn pollutants. 
 
-# Operations in Excel 
+# Chemistry background (Needs to be cleaned up) 
+
+Since 1975 Environment and Climate Change Canada (ECCC) has been monitoring several airborn pollutants through the National Aurborn Pollutant Surveillance (NAPS) program. Two of the key pollutants monitored are ozone (O~3~) and nitrogen dioxide (NO~2~), and whose interdepentant dirunal cycles are expressed through equations 1 to 3, right. With the provided datasets students are able to visualize this relationship in a time-series plot as well as qualitatively assess this relationship (see below). Lastly the relationship between O~3~ and NO~2~ is so intimate, atmospheric chemist have developped the tern "odd oxygen", O~x~, as the sum of these two components (equation 4).[@Kley1994]
+
+```{marginfigure}
+\begin{align}
+  NO_2 + photon &\rightarrow NO + O \\
+  O + O_2 &\rightarrow O_3 \\
+  O_3 + NO &\rightarrow O_2 + NO_2 \\
+  [O_3] + [NO_2] &= [O_x]
+\end{align}
+```
+
+# Experiment workflow
+
+Operationally, each student analyzes one randomly assigned winter and summer dataset, each comprising a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a monitoring station from the NAPS program. The experiment instructions guide students through the data analysis workflow made populare by Wickham and Grolemund.[@Wickham2017] 
+
+![Data exploration/analysis workflow; figure from *R for Data Science* (2017)](images/data-science-workflow.png)
+
+\newpage
+
+- *Importing* their assigned comma seperate values (.csv) datasets into Excel.
+- *Tidying* their data and setting up their worksheets. This step consist of formatting cells to properly display values and handling missing data.^[Specfically, missing data is stored as -999 in NAPS datasets but this value is litorally interpreted by Excel, confounding data visualization/analysis.] 
+- *Visualizing* their quantitative information through a time-series plot of time vs. concentration of pollutant. 
+- *Transforming* their data using mathematical operators in Excel to calculate total oxidant and adding it to their time-series plot as well as calculating 8 hr moving averages. 
+- *Modeling* a linear relationship between O~3~ and NO~2~ to qualitatively assess the inversal relationship between these two contaminants. ^[This is accomplished using the "add trendline" function in Excel, although previous versions of the lab utilized the "linear regression" function of the *Analysis Toolpak*.]
+- *Communicating* and exploring their results through a series of accompanying questions written by Dr. J. D'eon. 
+
+# Expected student outcomes 
+
+- generate plots like figure 2. 
+- discuss difference between winter and summer datasets (figure 2b and 2c)
+- excel functionality (maybe list)
+
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, fig.pos = "!", fig.height=3, fig.cap = "Example plots students are expected to create. (A) time-series of pollutants across 7 winter days. (B) Correlation plot of O3 and NO2 concentrations with linear regression in the winter and (C) summer."}
+data <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day10to16.csv", header = TRUE)
+dataSummer <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day189to195.csv", header = TRUE)
+
+
+data <- data %>%
+  mutate(time = convertToDateTime(data$Date, origin = "1900-01-01")) %>%
+  filter(O3 != -999) %>%
+  filter(NO2 != -999) %>%
+  mutate(OX = NO2 + O3)
+
+### Making data tidyR friendly --------------------------------------------------
+dataCol <- data %>%
+  select(-c("Date")) %>%
+  pivot_longer(-time, names_to = "pollutant", values_to = "concentration")
+
+
+dataSummer <- dataSummer %>%
+  mutate(time = convertToDateTime(dataSummer$Date, origin = "1900-01-01")) %>%
+  filter(O3 != -999) %>%
+  filter(NO2 != -999) %>%
+  mutate(OX = NO2 + O3)
+
+### Making data tidyR friendly --------------------------------------------------
+dataSummerCol <- dataSummer %>%
+  select(-c("Date")) %>%
+  pivot_longer(-time, names_to = "pollutant", values_to = "concentration")
+
+
+
+### Time series ----------------
+a <- ggplot(data = dataCol, aes(x = time, y = concentration, color = pollutant)) +
+  geom_line(size = 1) +
+  theme_classic() +
+   theme(text = element_text(size = 10),
+         legend.position = "right") +
+  ylab(bquote('Conc., ppb')) +
+  xlab(bquote('Time')) 
+
+### Correlation plot with Linear regression and equation -------------------------
+
+formula <- y ~ x ### Need to keep this so LM regression appears on plot
+
+b <- ggplot(data = data, aes(x = NO2, y = O3)) +
+  geom_point(size = 0.5) + 
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 45)) + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 70)) +
+  theme_classic() +
+  theme(text = element_text(size = 10))+
+  xlab(bquote('Conc.' ~NO[2]~', ppb')) +
+  ylab(bquote('Conc.' ~O[3]~', ppb')) +
+  geom_smooth(method = "lm", formula = formula, se = FALSE) +
+  stat_poly_eq(aes(label =  paste(stat(rr.label), sep = "*\", \"*")),
+               formula = formula, rr.digits = 4 , parse = TRUE, label.y = 1, label.x = 0.5, size = 3)
+
+c <- ggplot(data = dataSummer, aes(x = NO2, y = O3)) +
+  geom_point(size = 0.5) + 
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 45)) + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 70)) +
+  theme_classic() +
+  theme(text = element_text(size = 10))+
+  xlab(bquote('Conc.' ~NO[2]~', ppb')) +
+  ylab(bquote('Conc.' ~O[3]~', ppb')) +
+  geom_smooth(method = "lm", formula = formula, se = FALSE) +
+    stat_poly_eq(aes(label =  paste(stat(rr.label), sep = "*\", \"*")),
+               formula = formula, rr.digits = 4 , parse = TRUE, label.y = 1, label.x = 0.5, size = 3)
+
+  
+
+
+gt <- arrangeGrob(a,                               # bar plot spaning two columns
+             b, c,                               # box plot and scatter plot
+             ncol = 2, nrow = 2, 
+             layout_matrix = rbind(c(1,1), c(2,3)))
+# Add labels to the arranged plots
+p <- as_ggplot(gt) +                                # transform to a ggplot
+  draw_plot_label(label = c("A", "B", "C"), size = 10,
+                  x = c(0, 0, 0.5), y = c(1, 0.55, 0.55)) # Add labels
+p
+
+```
+
+# Lab Results 
+
+- couldn't really get a survey in
+- conversation with TAs revealed some minor issues around Quercus layout and errors in supplementary tip-sheet, these were addressed for upcoming Fall 2020 term. 
+- Review student submitted work showed most of them understood what was goign on, although a handful of errors (i.e. applying linear regression to time series data. )
+
+# Troubles with implementation
+
+Only uploaded 15 winter and 15 summer datasets. 
+
+# Future directions
+
+- Dialing in Quercus setup to expand course componenets to > 1800 students. 
+  - can create that many datasets/answer keys easily, bottleneck is upload to quercus. 
+- refine Excel operations
+- Explicit discussions on data analysis
+  - this lab, in my opinion, is more about understanding data analysis than it is chemistry. Once you learn stuff here you can apply in all sorts of ways in upper year courses. 
+  - That's why the *Tip Sheet* i wrote was so long. I never expected students to read the entire thing, but if they had any questions they could look it up there. To be fair though, I think the info within that document should prettied up and set up as a departmental wide guide to data visualization/analysis etc. Some of the stuff made by grad students is awful/deceptive. 
+- Enhanced discussion on statistics with a focus on interpreting the numbers rather then calculating them with mathematical formulas. 
+
+# Stuff left on the cutting room floor 
 
 * tried a bunch of stuff, and left plenty on the cutting room floor
   + SO2 work 
   + using Analysis Toolpak for linear regression (outputs additional parameters hidden from display line of best fit)
   
-Eventually settled on comparing time series & correlations between summer and winter months. Addressed the 5 elements of data analysis highlited in the intro:
 
-  * import -> .csv to .xlsx
-  * tidy -> remove -999, view Dates, remove gaps in data
-  * transform -> OX calculation, summary statistics, potential for 8hr rolling average
-  * visualize -> time series and correlation plots
-  * communicate -> questions students awnsered. 
 
-# Logistics
 
-Had to genereate unique data for students, and had to be expandable. 
-*run through the r code process highlighting stuff like generating datasets & awnser keys* 
 
-# Troubles with implementation
 
-Only uploaded 15 winter and 15 summer datasets. Unfamiliarity & Disconnect between me and Quercus/Teaching Staff hampered some of the broader implementations. 
+# Source code and instructions for generating datasets
 
+The source code and example ECCC data, student datasets, and TA answer reports can all be found on [GitHub](https://github.com/DavidRossHall/CHM135_Exp1Data).^[Github link: [https://github.com/DavidRossHall/CHM135_Exp1Data](https://github.com/DavidRossHall/CHM135_Exp1Data)]
+
+**NEED to explain GitHub better ** I feel like this is goign to be lost on folks, when it actually solves so many issues about the way information is passed along between faculty and over the years. 
+
+GitHub provides hosting for software developement, distribution version control, and source code management and is readily [integretated into the RStudio environment](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN).  In practice, this means that the code used to automatically genereate student datasets and anwser keys is preserved online, and safely passed along from year to year. The GitHub environment is ideal for introducing new componenets and removing old ones from the code thanks to version control. This is expecially important as faculty frequently rotate through the CHM 135 course. 
+
+# Brief discussion on how datasets are generated, what transformations need to be applied, etc. 
+
+```{r, echo = FALSE}
+dataCSV <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day10to16.csv", header = TRUE)
+
+knitr::kable(head(dataCSV[, ]), 
+             "simple",
+             digits = c(4, 0, 0),
+             caption = " A tibble of a student assigned dataset; note the Excel complient data & time formats.",
+             booktabs = T)
+
+
+```
 
 ```{r bib, include=FALSE}
 # create a bib file for the R packages used in this document

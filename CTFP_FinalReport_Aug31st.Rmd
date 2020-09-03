@@ -39,14 +39,16 @@ library(gridExtra)
 
 # Introduction
 
-Whether you like it or not, we are living in an increasingly data centric world, and the field of chemistry is no exception. An oft overlooked aspect of this is how exactly data (measurements, signals, etc) is transformed into information (trends, correlation) and finally into knowledge. Moreover, the explicit teaching of these concepsts is often neglected resulting in increasing student frustration.[@Schlotter2013] Motivated by this, and the need to transfer to a virtual laboratory environment as a result of Covid-19, we saught to develop a new experiment for *CHM 135: Physical Principles*. 
+Whether you like it or not, we are living in an increasingly data centric world, and the field of chemistry is no exception. An oft overlooked aspect of this is how exactly data (measurements, signals, etc) is transformed into information (trends, correlation) and finally into knowledge. Moreover, the explicit teaching of these concepts is often neglected resulting in increasing student frustration.[@Schlotter2013] Motivated by this, and the need to transfer to a virtual laboratory environment as a result of Covid-19, we saught to develop a new, remote learning compatible, experiment for *CHM 135: Physical Principles*. 
 
 
-*Experiment 1: The Chemistry of Air Quality* is the results of these efforts. In this new experiment first-year students are introduced to fundamental data analysis concepts as they explore some of the chemistry of airborn pollutants. 
+*Experiment 1: The Chemistry of Air Quality* is the results of our efforts. In this new experiment first-year students are introduced to fundamental data analysis concepts as they explore some of the chemistry of airborn pollutants. 
 
-# Chemistry background (Needs to be cleaned up) 
+# Chemistry background
 
-Since 1975 Environment and Climate Change Canada (ECCC) has been monitoring several airborn pollutants through the National Aurborn Pollutant Surveillance (NAPS) program. Two of the key pollutants monitored are ozone (O~3~) and nitrogen dioxide (NO~2~), and whose interdepentant dirunal cycles are expressed through equations 1 to 3, right. With the provided datasets students are able to visualize this relationship in a time-series plot as well as qualitatively assess this relationship (see below). Lastly the relationship between O~3~ and NO~2~ is so intimate, atmospheric chemist have developped the tern "odd oxygen", O~x~, as the sum of these two components (equation 4).[@Kley1994]
+Since 1975 Environment and Climate Change Canada (ECCC) has been monitoring several airborn pollutants through the National Airborne Pollutant Surveillance (NAPS) program. Two of the key pollutants monitored are ozone (O~3~) and nitrogen dioxide (NO~2~), and whose interdependent diurnal cycles are expressed through equations 1 to 3, right. The relationship between O~3~ and NO~2~ is so intimate, atmospheric chemist have developed the tern "odd oxygen", O~x~, as the sum of these two components (equation 4).[@Kley1994] Lastly, the correlation between O~3~ and NO~2~ varies with environmetal influences such as increased levels of volatile organic compounds and temperature engendered during the summer months. Through the NAPS data, students can visualize and qualitatively assess these relationships. 
+
+
 
 ```{marginfigure}
 \begin{align}
@@ -59,27 +61,27 @@ Since 1975 Environment and Climate Change Canada (ECCC) has been monitoring seve
 
 # Experiment workflow
 
-Operationally, each student analyzes one randomly assigned winter and summer dataset, each comprising a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a monitoring station from the NAPS program. The experiment instructions guide students through the data analysis workflow made populare by Wickham and Grolemund.[@Wickham2017] 
+Operationally, after an introductory pre-lab prepared by Dr. D'eon (with accompanying video and gas phase chemistry questions), each student analyzes one randomly assigned winter and summer data set. Each dataset comprises a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a downtown Toronto monitoring station from the NAPS program. The experiment instructions guide students through the data analysis workflow made popular by Wickham and Grolemund.[@Wickham2017] 
 
 ![Data exploration/analysis workflow; figure from *R for Data Science* (2017)](images/data-science-workflow.png)
 
 \newpage
 
-- *Importing* their assigned comma seperate values (.csv) datasets into Excel.
-- *Tidying* their data and setting up their worksheets. This step consist of formatting cells to properly display values and handling missing data.^[Specfically, missing data is stored as -999 in NAPS datasets but this value is litorally interpreted by Excel, confounding data visualization/analysis.] 
+- *Importing* their assigned comma separate values (.csv) data sets into Excel.
+- *Tidying* their data and setting up their worksheets. This step consist of formatting cells to properly display values and handling missing data.^[Specifically, missing data is stored as -999 in NAPS data sets but this value is literally interpreted by Excel, confounding data visualization/analysis.] 
 - *Visualizing* their quantitative information through a time-series plot of time vs. concentration of pollutant. 
 - *Transforming* their data using mathematical operators in Excel to calculate total oxidant and adding it to their time-series plot as well as calculating 8 hr moving averages. 
-- *Modeling* a linear relationship between O~3~ and NO~2~ to qualitatively assess the inversal relationship between these two contaminants. ^[This is accomplished using the "add trendline" function in Excel, although previous versions of the lab utilized the "linear regression" function of the *Analysis Toolpak*.]
+- *Modelling* a linear relationship between O~3~ and NO~2~ to qualitatively assess the inversal relationship between these two contaminants. ^[This is accomplished using the "add trend line" function in Excel, although previous versions of the lab utilized the "linear regression" function of the *Analysis Toolpak*.]
 - *Communicating* and exploring their results through a series of accompanying questions written by Dr. J. D'eon. 
 
 # Expected student outcomes 
 
 - generate plots like figure 2. 
-- discuss difference between winter and summer datasets (figure 2b and 2c)
+- discuss difference between winter and summer data sets (figure 2b and 2c)
 - excel functionality (maybe list)
 
 
-```{r, echo = FALSE, message = FALSE, warning=FALSE, fig.pos = "!", fig.height=3, fig.cap = "Example plots students are expected to create. (A) time-series of pollutants across 7 winter days. (B) Correlation plot of O3 and NO2 concentrations with linear regression in the winter and (C) summer."}
+```{r,fig.margin=TRUE, echo = FALSE, message = FALSE, warning=FALSE, fig.height = 6, fig.cap = "Example plots students are expected to create. (A) time-series of pollutants across 7 winter days. (B) Correlation plot of O3 and NO2 concentrations with linear regression in the winter and (C) summer."}
 data <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day10to16.csv", header = TRUE)
 dataSummer <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day189to195.csv", header = TRUE)
 
@@ -113,7 +115,7 @@ dataSummerCol <- dataSummer %>%
 a <- ggplot(data = dataCol, aes(x = time, y = concentration, color = pollutant)) +
   geom_line(size = 1) +
   theme_classic() +
-   theme(text = element_text(size = 10),
+   theme(text = element_text(size = 12),
          legend.position = "right") +
   ylab(bquote('Conc., ppb')) +
   xlab(bquote('Time')) 
@@ -127,7 +129,7 @@ b <- ggplot(data = data, aes(x = NO2, y = O3)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 45)) + 
   scale_y_continuous(expand = c(0, 0), limits = c(0, 70)) +
   theme_classic() +
-  theme(text = element_text(size = 10))+
+  theme(text = element_text(size = 12))+
   xlab(bquote('Conc.' ~NO[2]~', ppb')) +
   ylab(bquote('Conc.' ~O[3]~', ppb')) +
   geom_smooth(method = "lm", formula = formula, se = FALSE) +
@@ -139,7 +141,7 @@ c <- ggplot(data = dataSummer, aes(x = NO2, y = O3)) +
   scale_x_continuous(expand = c(0, 0), limits = c(0, 45)) + 
   scale_y_continuous(expand = c(0, 0), limits = c(0, 70)) +
   theme_classic() +
-  theme(text = element_text(size = 10))+
+  theme(text = element_text(size = 12))+
   xlab(bquote('Conc.' ~NO[2]~', ppb')) +
   ylab(bquote('Conc.' ~O[3]~', ppb')) +
   geom_smooth(method = "lm", formula = formula, se = FALSE) +
@@ -149,14 +151,24 @@ c <- ggplot(data = dataSummer, aes(x = NO2, y = O3)) +
   
 
 
-gt <- arrangeGrob(a,                               # bar plot spaning two columns
-             b, c,                               # box plot and scatter plot
-             ncol = 2, nrow = 2, 
-             layout_matrix = rbind(c(1,1), c(2,3)))
+# gt <- arrangeGrob(a,                               # bar plot spaning two columns
+#              b, c,                               # box plot and scatter plot
+#              ncol = 2, nrow = 2, 
+#              layout_matrix = rbind(c(1,1), c(2,3)))
+# # Add labels to the arranged plots
+# p <- as_ggplot(gt) +                                # transform to a ggplot
+#   draw_plot_label(label = c("A", "B", "C"), size = 10,
+#                   x = c(0, 0, 0.5), y = c(1, 0.55, 0.55)) # Add labels
+# p
+
+
+gt <- arrangeGrob(a,                               
+             b, c,                               
+             ncol = 1, nrow = 3)
 # Add labels to the arranged plots
 p <- as_ggplot(gt) +                                # transform to a ggplot
-  draw_plot_label(label = c("A", "B", "C"), size = 10,
-                  x = c(0, 0, 0.5), y = c(1, 0.55, 0.55)) # Add labels
+  draw_plot_label(label = c("A", "B", "C"), size = 16,
+                  x = c(0, 0, 0), y = c(1, 0.68, 0.35)) # Add labels
 p
 
 ```
@@ -165,16 +177,16 @@ p
 
 - couldn't really get a survey in
 - conversation with TAs revealed some minor issues around Quercus layout and errors in supplementary tip-sheet, these were addressed for upcoming Fall 2020 term. 
-- Review student submitted work showed most of them understood what was goign on, although a handful of errors (i.e. applying linear regression to time series data. )
+- Review student submitted work showed most of them understood what was going on, although a handful of errors (i.e. applying linear regression to time series data. )
 
 # Troubles with implementation
 
-Only uploaded 15 winter and 15 summer datasets. 
+Only uploaded 15 winter and 15 summer data sets. 
 
 # Future directions
 
-- Dialing in Quercus setup to expand course componenets to > 1800 students. 
-  - can create that many datasets/answer keys easily, bottleneck is upload to quercus. 
+- Dialing in Quercus setup to expand course components to > 1800 students. 
+  - can create that many data sets/answer keys easily, bottleneck is upload to quercus. 
 - refine Excel operations
 - Explicit discussions on data analysis
   - this lab, in my opinion, is more about understanding data analysis than it is chemistry. Once you learn stuff here you can apply in all sorts of ways in upper year courses. 

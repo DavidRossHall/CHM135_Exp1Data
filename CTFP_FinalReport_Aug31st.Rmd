@@ -178,7 +178,11 @@ Furthermore, after inspection of more than 300 student submitted figures, none h
 
 # Implementation in the Fall Term 
 
-Experiment 1 is slated to be introduced in the upcoming Fall 2020 CHM 135 session, with an estimated >1500 enrolled students. Fortunately, the scope of the NAPS program and the readily scalable coding used to generate student datasets/answer sheets can easily cope with the increase in course participants. As well, a limitation of the summer session was that limitations in the Quercus setup practically limited the entire course to 15 winter and 15 summer datasets. This has been addressed in the upcoming session where each lab section will have it's own unique pool of datasets from a unique NAPS monitoring station in Toronto. While we'd ideally like to assign each student with a unique dataset, this method best minimizes overlap in student analysis while remaining practical in the existing Quercus infrastructure. 
+Experiment 1 is slated to be introduced in the upcoming Fall 2020 CHM 135 session, with an estimated >1500 enrolled students. Fortunately, the scope of the NAPS program and the readily scalable coding used to generate student datasets/answer sheets can easily cope with the increase in course participants. As well, a limitation of the summer session was that limitations in the Quercus setup practically limited the entire course to 15 winter and 15 summer datasets. This has been addressed in the upcoming session where each lab section will have it's own unique pool of datasets from a unique NAPS monitoring station in Toronto. While we'd ideally like to assign each student with a unique dataset, this method best minimizes overlap in student analysis while remaining logistically practical within the existing Quercus infrastructure. 
+
+# Future Directions & Personal Speculations
+
+If someone understands Excel, the actual laboratory exercise is trivial and can be easily completed in half an hour. I think that is perfectly alright, as the principle aim of Experiment 1 is to assure all incoming students have a common-core understanding of data analysis and operations in Excel. 
 
 - Dialing in Quercus setup to expand course components to > 1800 students. 
   - can create that many data sets/answer keys easily, bottleneck is upload to quercus. 
@@ -190,13 +194,18 @@ Experiment 1 is slated to be introduced in the upcoming Fall 2020 CHM 135 sessio
 
 # Stuff left on the cutting room floor 
 
-* tried a bunch of stuff, and left plenty on the cutting room floor
-  + SO2 work 
-  + using Analysis Toolpak for linear regression (outputs additional parameters hidden from display line of best fit)
+A surprisingily difficult aspect of creating Experiment 1 was deciding what *not to* include in the course. While we're largely satisfied with the present course, some of the elements could prove useful for future interations or upper year classes. These ideas can be readily re-integrated into the existing experimental framework if needed. Some of these ideas are briefly described below. We hope that they inspire readers for future versions of this lab. 
+
+- S0~2~ is the main pollutant responsible for acid rain, and was regualted nationally in 1985 and provincially in 2007. Consequently, we wanted students to investigate if SO~2~ levels have significantly decreased as a result of these regulations. NAPS data of SO~2~ emissions cover more than 50 statiosn in Ontario and coveraged extends as far back as 1975. While a great oppertunity to discuss statisical significance, and readily executable in Excel, we struggled with exploring the larger chemistry of this phenomeone in a context approriate to the CHM 135 course. 
+- The current lab utilizes the "add trendline" option in Excel. We had original envisioned using the *Analysis Toolpak* which extends the linear regression beyond a line of best fit and R^2^ to significance of the coefficeincts (slope) and ANOVA analysis. While the greater exploration of linear regression was promising, the stastical discussionw as determined to be beyond first-year chemistry students.  
+- Building off of the last point, we had integrated historical ECCC weather data E^[Hourly weather data downloadble here:https://toronto.weatherstats.ca/download.html] into the analysis. We envisioned students comparing the correlation of O~3~ with NO~2~ and with temperature (or other weather phenomena). This was abandonned for the present winter vs. summer. 
+
+  - There exist an oppertunty to expand this component to multiple linear regression utilizing pollutant concentration and various weather readings, although this is more appropraite for an upper year environmental chemistry course. 
   
-
-
-
+- Since O~3~ and NO~2~ levels are largely affected by anthropogenic activity, we wanted to analyze the effects of the Covid-9 related "anthropause" on downtown Toronto levels. Unfortunatly the NAPS datasets has a one year lag time to publication, and the live feed from the Ontario Ministry of the Environment^[MOE real time air quality data can be fonud here: http://www.airqualityontario.com/history/summary.php] requires either significant data collection from students or web-scrapping. The former is unreasonable as the entire course could be derailed if the website goes down, and the later is beyond the skills/contract hours of this humble TA. 
+  - This may be worth revisiting in upcoming years when the 2020 NAPS dataset is realeased. 
+  
+- The NAPS program spans the entirety of Canada. We explored comparisons between rural and urban NAPS mesurements but found the process quickly excalated beyond a CHM 135 appropraite discussion. 
 
 
 # Source code and instructions for generating datasets

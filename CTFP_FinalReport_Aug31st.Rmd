@@ -61,30 +61,26 @@ Since 1975 Environment and Climate Change Canada (ECCC) has been monitoring seve
 
 # Experiment workflow
 
-Operationally, after an introductory pre-lab prepared by Dr. D'eon (with accompanying video and gas phase chemistry questions), each student analyzes one randomly assigned winter and summer data set. Each dataset comprises a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a downtown Toronto monitoring station from the NAPS program. The experiment instructions guide students through the data analysis workflow made popular by Wickham and Grolemund.[@Wickham2017] 
+Operationally, after an introductory pre-lab prepared by Dr. D'eon (with accompanying video and gas phase chemistry questions), each student analyzes one randomly assigned winter and summer data set, distributed through Quercus. Each dataset comprises a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a downtown Toronto monitoring station from the NAPS program. The experiment instructions, and a supporting *Tip Sheet* on operations in Excel necessary for Experiment 1, guide students through the data analysis workflow made popular by Wickham and Grolemund.[@Wickham2017] 
 
 ![Data exploration/analysis workflow; figure from *R for Data Science* (2017)](images/data-science-workflow.png)
 
-\newpage
-
 - *Importing* their assigned comma separate values (.csv) data sets into Excel.
-- *Tidying* their data and setting up their worksheets. This step consist of formatting cells to properly display values and handling missing data.^[Specifically, missing data is stored as -999 in NAPS data sets but this value is literally interpreted by Excel, confounding data visualization/analysis.] 
+- *Tidying* their data and setting up their worksheets. This step consist of formatting cells to properly display values and handling missing data.^[Specifically, NAPS stores missing values as -999, but this value is literally interpreted by Excel, requiring removal before further data visualization/analysis.]
 - *Visualizing* their quantitative information through a time-series plot of time vs. concentration of pollutant. 
 - *Transforming* their data using mathematical operators in Excel to calculate total oxidant and adding it to their time-series plot as well as calculating 8 hr moving averages. 
-- *Modelling* a linear relationship between O~3~ and NO~2~ to qualitatively assess the inversal relationship between these two contaminants. ^[This is accomplished using the "add trend line" function in Excel, although previous versions of the lab utilized the "linear regression" function of the *Analysis Toolpak*.]
+- *Modelling* a linear relationship between O~3~ and NO~2~ to qualitatively assess the inversal relationship between these two contaminants.^[This is accomplished using the "add trend line" function in Excel, although previous versions of the lab utilized the "linear regression" function of the *Analysis Toolpak*.]
 - *Communicating* and exploring their results through a series of accompanying questions written by Dr. J. D'eon. 
 
 # Expected student outcomes 
 
-- generate plots like figure 2. 
-- discuss difference between winter and summer data sets (figure 2b and 2c)
-- excel functionality (maybe list)
+Beyond the introduction to gas-phase and atmospheric chemistry, students are expected to learn the basics of data analysis and operations in Microsoft Excel. through the Experiment and supporting *Tip Sheet*. Topics covered include: cell referencing, mathematical operators, *find and replace* functions, cell formating, plotting, and summary statistics. While only touching the surface of data analysis, we believe this list touches upon the most frequently used operations in Excel, and provides a solid base from which students can improve their understanding and skills on their own or in future classes. 
 
+Verification of student learning is assessed through through the results of each students data analysis. For each data set, students are expected to plot a time-series of polutant concentration and a correlation plot of O~3~ and NO~2~ with linear regression (Figure 2A and 2B). Additionnaly they perform the same analysis on both the winter and summer datasets, illustrating the increasing complexity of summer vs. winter atmospheric chemistry (Figure 2C). Through their visulizations, students must answer a series of accompanying questions wherein they inquire about possible explanations for the differences in their winter and summer results. Lastly, any faults in a student's data analysis are readily aparent in their visualations. For example, an errant '-999' value leftover from the NAPS dataset is easily visible to the TA (Figure 2D). 
 
-```{r,fig.margin=TRUE, echo = FALSE, message = FALSE, warning=FALSE, fig.height = 6, fig.cap = "Example plots students are expected to create. (A) time-series of pollutants across 7 winter days. (B) Correlation plot of O3 and NO2 concentrations with linear regression in the winter and (C) summer."}
+```{r,fig.margin=TRUE, echo = FALSE, message = FALSE, warning=FALSE, fig.height = 7, fig.cap = "Example of plots students are expected to create. (A) time-series of pollutants across 7 winter days. (B) Correlation plot of O3 and NO2 concentrations with linear regression in the winter and (C) summer. (D) Example plot if a '-999' value wasn't removed."}
 data <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day10to16.csv", header = TRUE)
 dataSummer <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day189to195.csv", header = TRUE)
-
 
 data <- data %>%
   mutate(time = convertToDateTime(data$Date, origin = "1900-01-01")) %>%
@@ -109,8 +105,6 @@ dataSummerCol <- dataSummer %>%
   select(-c("Date")) %>%
   pivot_longer(-time, names_to = "pollutant", values_to = "concentration")
 
-
-
 ### Time series ----------------
 a <- ggplot(data = dataCol, aes(x = time, y = concentration, color = pollutant)) +
   geom_line(size = 1) +
@@ -133,8 +127,9 @@ b <- ggplot(data = data, aes(x = NO2, y = O3)) +
   xlab(bquote('Conc.' ~NO[2]~', ppb')) +
   ylab(bquote('Conc.' ~O[3]~', ppb')) +
   geom_smooth(method = "lm", formula = formula, se = FALSE) +
-  stat_poly_eq(aes(label =  paste(stat(rr.label), sep = "*\", \"*")),
-               formula = formula, rr.digits = 4 , parse = TRUE, label.y = 1, label.x = 0.5, size = 3)
+    stat_poly_eq(aes(label =  paste(stat(rr.label), sep = "*\", \"*")),
+               formula = formula, rr.digits = 4 , parse = TRUE, label.y = 0.25, label.x = 0.95, size = 4)+
+  annotate("text", x =35, y = 33, label = "winter")
 
 c <- ggplot(data = dataSummer, aes(x = NO2, y = O3)) +
   geom_point(size = 0.5) + 
@@ -146,38 +141,41 @@ c <- ggplot(data = dataSummer, aes(x = NO2, y = O3)) +
   ylab(bquote('Conc.' ~O[3]~', ppb')) +
   geom_smooth(method = "lm", formula = formula, se = FALSE) +
     stat_poly_eq(aes(label =  paste(stat(rr.label), sep = "*\", \"*")),
-               formula = formula, rr.digits = 4 , parse = TRUE, label.y = 1, label.x = 0.5, size = 3)
+               formula = formula, rr.digits = 4 , parse = TRUE, label.y = 0.25, label.x = 0.95, size = 4) +
+  annotate("text", x =36, y = 33, label = "summer")
 
+# -999 value for example
+
+dataSummer[2,3] = -999
   
+d <- ggplot(data = dataSummer, aes(x = NO2, y = O3)) +
+  geom_point(size = 0.5) + 
+  scale_x_continuous(expand = c(0, 0), limits = c(0, 45)) + 
+  scale_y_continuous(expand = c(0, 0), limits = c(-1050, 70)) +
+  theme_classic() +
+  theme(text = element_text(size = 12))+
+  xlab(bquote('Conc.' ~NO[2]~', ppb')) +
+  ylab(bquote('Conc.' ~O[3]~', ppb')) +
+  geom_segment(aes(x = 22, y = -600, xend = 16.5, yend = -950),
+                  arrow = arrow(length = unit(0.5, "cm"))) +
+  annotate("text", x = 32, y = -550, label = "error from analysis")
 
-
-# gt <- arrangeGrob(a,                               # bar plot spaning two columns
-#              b, c,                               # box plot and scatter plot
-#              ncol = 2, nrow = 2, 
-#              layout_matrix = rbind(c(1,1), c(2,3)))
-# # Add labels to the arranged plots
-# p <- as_ggplot(gt) +                                # transform to a ggplot
-#   draw_plot_label(label = c("A", "B", "C"), size = 10,
-#                   x = c(0, 0, 0.5), y = c(1, 0.55, 0.55)) # Add labels
-# p
-
-
-gt <- arrangeGrob(a,                               
-             b, c,                               
-             ncol = 1, nrow = 3)
+gt <- arrangeGrob(a, b, c, d,                               
+             ncol = 1, nrow = 4)
 # Add labels to the arranged plots
 p <- as_ggplot(gt) +                                # transform to a ggplot
-  draw_plot_label(label = c("A", "B", "C"), size = 16,
-                  x = c(0, 0, 0), y = c(1, 0.68, 0.35)) # Add labels
+  draw_plot_label(label = c("A", "B", "C", "D"), size = 16,
+                  x = c(0, 0, 0, 0), y = c(1, 0.78, 0.53, 0.28)) # Add labels
 p
 
 ```
 
 # Lab Results 
 
-- couldn't really get a survey in
-- conversation with TAs revealed some minor issues around Quercus layout and errors in supplementary tip-sheet, these were addressed for upcoming Fall 2020 term. 
-- Review student submitted work showed most of them understood what was going on, although a handful of errors (i.e. applying linear regression to time series data. )
+We were unable to introduce a survey to undergradaute students which explicitly addressed their experinences and thoughs with Experiment 1. However, discussing Experiment 1 with the four laboratory TAs revealed two promising insights. Firstly, the TAs found that students' questions were largely related to lab content, and not the technical aspects of Excel. Secondly, student questions that did pertain to Excel were readily addressed by directing them to the supporting *Tip sheet* document. 
+
+Furthermore, after inspection of more than 300 student submitted plots, none had any critical flaws (either in visualization or data analysis). There were instances of several minor issues common to several student plots (i.e. adding a linear regression to their time-series plots), but these have been addressed in the updated Experiment 1 instructions and supporting *Tip Sheet* for the Fall 2020 session.
+
 
 # Troubles with implementation
 

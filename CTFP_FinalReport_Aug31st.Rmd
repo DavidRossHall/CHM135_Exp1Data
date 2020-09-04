@@ -35,6 +35,7 @@ library(RcppRoll)
 library(cowplot)
 library(kableExtra)
 library(gridExtra)
+library(grid)
 ```
 
 # Introduction
@@ -61,7 +62,7 @@ Since 1975 Environment and Climate Change Canada (ECCC) has been monitoring seve
 
 # Experiment workflow
 
-Operationally, after an introductory pre-lab prepared by Dr. D'eon (with accompanying video and gas phase chemistry questions), each student analyzes one randomly assigned winter and summer data sets from a pool upload and distributed through Quercus. Each dataset comprises a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a downtown Toronto monitoring station from the NAPS program.^[A more technical explanation of how NAPS data was subseted for students can be found at page 4.] The experiment instructions, and a supporting *Tip Sheet* on operations in Excel necessary for Experiment 1, guide students through the data analysis workflow made popular by Wickham and Grolemund.[@Wickham2017] 
+Operationally, after an introductory pre-lab prepared by Dr. D'eon (with accompanying video and gas phase chemistry questions), each student analyzes one randomly assigned winter and summer data sets from a pool upload and distributed through Quercus. Each dataset comprises a 7-day snapshot of O~3~ and NO~2~ concentrations as measured by a downtown Toronto monitoring station from the NAPS program.^[A more technical explanation of how NAPS data was subseted for students can be found on page 6.] The experiment instructions, and a supporting *Tip Sheet* on operations in Excel necessary for Experiment 1, guide students through the data analysis workflow made popular by Wickham and Grolemund.[@Wickham2017] 
 
 ![Data exploration/analysis workflow; figure from *R for Data Science* (2017)](images/data-science-workflow.png)
 
@@ -76,7 +77,7 @@ Operationally, after an introductory pre-lab prepared by Dr. D'eon (with accompa
 
 Beyond the introduction to gas-phase and atmospheric chemistry, students are expected to learn the basics of data analysis and operations in Microsoft Excel. through the Experiment and supporting *Tip Sheet*. Topics covered include: cell referencing, mathematical operators, *find and replace* functions, cell formating, plotting, and summary statistics. While only touching the surface of data analysis, we believe this list touches upon the most frequently used operations in Excel, and provides a solid base from which students can improve their understanding and skills on their own or in future classes. 
 
-Verification of student learning is assessed through through the results of each students data analysis. For each data set, students are expected to plot a time-series of polutant concentration and a correlation plot of O~3~ and NO~2~ with linear regression (Figure 2A and 2B). Additionnaly they perform the same analysis on both the winter and summer datasets, illustrating the increasing complexity of summer vs. winter atmospheric chemistry (Figure 2C). Through their visulizations, students must answer a series of accompanying questions wherein they inquire about possible explanations for the differences in their winter and summer results. Any faults in a student's data analysis are readily aparent in their visualations. For example, an errant '-999' value leftover from the NAPS dataset is easily visible to the TA (Figure 2D). Lastly, every student dataset that is generated is accompanied with by a PDF anwser sheet containing a time-series plot, correlation plots, and all summary statistics students are expedcted to perform. Consequently TAs can simply compare a students analysis of a given datasets against the accompanying anwser sheet to quickly verify their work. How the answer sheets are generated is discussed below.
+Verification of student learning is assessed through through the results of each students data analysis. For each data set, students are expected to plot a time-series of polutant concentration and a correlation plot of O~3~ and NO~2~ with linear regression (Figure 2A and 2B). Additionnaly they perform the same analysis on both the winter and summer datasets, illustrating the increasing complexity of summer vs. winter atmospheric chemistry (Figure 2C). Through their visulizations, students must answer a series of accompanying questions wherein they inquire about possible explanations for the differences in their winter and summer results. Any faults in a student's data analysis are readily aparent in their visualations. For example, an errant '-999' value leftover from the NAPS dataset is easily visible to the TA (Figure 2D). Lastly, every student dataset that is generated is accompanied by a PDF anwser sheet containing a time-series plot, correlation plots, and all summary statistics students are expedcted to perform. Consequently TAs can simply compare a students analysis of a given datasets against the accompanying anwser sheet to quickly verify their work. How the answer sheets are generated is discussed below.
 
 ```{r,fig.margin=TRUE, echo = FALSE, message = FALSE, warning=FALSE, fig.height = 7, fig.cap = "Example of plots students are expected to create. (A) time-series of pollutants across 7 winter days. (B) Correlation plot of O3 and NO2 concentrations with linear regression in the winter and (C) summer. (D) Example plot if a '-999' value wasn't removed."}
 data <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day10to16.csv", header = TRUE)
@@ -200,9 +201,9 @@ A surprisingily difficult aspect of creating Experiment 1 was deciding what *not
 - The current lab utilizes the "add trendline" option in Excel. We had original envisioned using the *Analysis Toolpak* which extends the linear regression beyond a line of best fit and R^2^ to significance of the coefficeincts (slope) and ANOVA analysis. While the greater exploration of linear regression was promising, the stastical discussionw as determined to be beyond first-year chemistry students.  
 - Building off of the last point, we had integrated historical ECCC weather data E^[Hourly weather data downloadble here:https://toronto.weatherstats.ca/download.html] into the analysis. We envisioned students comparing the correlation of O~3~ with NO~2~ and with temperature (or other weather phenomena). This was abandonned for the present winter vs. summer. 
 
-  - There exist an oppertunty to expand this component to multiple linear regression utilizing pollutant concentration and various weather readings, although this is more appropraite for an upper year environmental chemistry course. 
+  - There exist an oppertunity to expand this component to multiple linear regression utilizing pollutant concentration and various weather readings, although this is more appropraite for an upper year environmental chemistry course. 
   
-- Since O~3~ and NO~2~ levels are largely affected by anthropogenic activity, we wanted to analyze the effects of the Covid-9 related "anthropause" on downtown Toronto levels. Unfortunatly the NAPS datasets has a one year lag time to publication, and the live feed from the Ontario Ministry of the Environment^[MOE real time air quality data can be fonud here: http://www.airqualityontario.com/history/summary.php] requires either significant data collection from students or web-scrapping. The former is unreasonable as the entire course could be derailed if the website goes down, and the later is beyond the skills/contract hours of this humble TA. 
+- Since O~3~ and NO~2~ levels are largely affected by anthropogenic activity, we wanted to analyze the effects of the Covid-9 related "anthropause" on downtown Toronto levels. Unfortunatly the NAPS datasets has a one year lag time to publication, and the live feed from the Ontario Ministry of the Environment^[MOE real time air quality data can be found here: http://www.airqualityontario.com/history/summary.php] requires either significant data collection from students or web-scrapping. The former is unreasonable as the entire course could be derailed if the website goes down, and the later is beyond the skills/contract hours of this humble TA. 
   - This may be worth revisiting in upcoming years when the 2020 NAPS dataset is realeased. 
   
 - The NAPS program spans the entirety of Canada. We explored comparisons between rural and urban NAPS mesurements but found the process quickly excalated beyond a CHM 135 appropraite discussion. 
@@ -210,25 +211,41 @@ A surprisingily difficult aspect of creating Experiment 1 was deciding what *not
 
 # Source code and instructions for generating datasets
 
-The source code and example ECCC data, student datasets, and TA answer reports can all be found on [GitHub](https://github.com/DavidRossHall/CHM135_Exp1Data).^[Github link: [https://github.com/DavidRossHall/CHM135_Exp1Data](https://github.com/DavidRossHall/CHM135_Exp1Data)]
+Generation of all of the data sets and their accompanying answer sheets are executed in R with prodigious use of the *tidyverse* and *Rmarkdown*. As it stands we can easily generate a unique pairing of summer/winter datasets for evevery student in the Fall 2020 session. The source code and example ECCC data, student datasets, and TA answer reports can all be found on [GitHub](https://github.com/DavidRossHall/CHM135_Exp1Data).^[Github repository with source code: [https://github.com/DavidRossHall/CHM135_Exp1Data](https://github.com/DavidRossHall/CHM135_Exp1Data)] 
 
-**NEED to explain GitHub better ** I feel like this is goign to be lost on folks, when it actually solves so many issues about the way information is passed along between faculty and over the years. 
+A more detailed description of the process is described in the GitHub repo, but briefly:
 
-GitHub provides hosting for software developement, distribution version control, and source code management and is readily [integretated into the RStudio environment](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN).  In practice, this means that the code used to automatically genereate student datasets and anwser keys is preserved online, and safely passed along from year to year. The GitHub environment is ideal for introducing new componenets and removing old ones from the code thanks to version control. This is expecially important as faculty frequently rotate through the CHM 135 course. 
+1. ECCC hourly data for NO~2~ or O~3~ is subset based on a given reporting station; in the present iteration all measurements are from downtown Toronto in 2018.
+2. Bilingual headers, ancillary columns, etc. are removed from the ECCC dataset, dates are conversed to Excel format, and the remaining data is transformed from the 'wide' matrix style to the 'long' columnar format for easier manipulation in Excel, see table 1.
+```{marginfigure}
 
-# Brief discussion on how datasets are generated, what transformations need to be applied, etc. 
-
-```{r, echo = FALSE}
-dataCSV <- read.csv("Toronto_60410_2018/Toronto_60410_2018_Day10to16.csv", header = TRUE)
-
-knitr::kable(head(dataCSV[, ]), 
-             "simple",
-             digits = c(4, 0, 0),
-             caption = " A tibble of a student assigned dataset; note the Excel complient data & time formats.",
-             booktabs = T)
-
+\begin{center}
+\begin{tabular}{ c c c }
+ \multicolumn{3}{l}{Table 1: Student data set}\\
+ \hline
+  Date & NO2 & O3 \\
+ \hline
+ 43110.00 & 18 & 15 \\
+ 43110.04 & 11 & 21 \\
+ 43110.08 & 8 & -999 \\
+ $\vdots$ & $\vdots$ & $\vdots$ \\
+ \hline
+\end{tabular}
+\end{center}
 
 ```
+3. A specified number of student datasets are generated from a 7-day moving window of the year-long data. I.e. dataset 1 is January 1st to 7th, dataset 2 is January 2nd to January 8th. A complimentary summer dataset is taken starting from July 1st.
+4. A "-999" error is inserted randomly into each student dataset. 
+5. Datasets saved in a new folder as .csv files. 
+6. For each dataset generated, a Rmarkdown script generates a PDF with the analysis results. TAs can compare the answer sheet to student submissions. 
+
+
+Again, all of this code is explained on the GitHub repo. For the unawares, GitHub provides hosting for software developement, distribution version control, and source code management and is readily [integretated into the RStudio environment](https://support.rstudio.com/hc/en-us/articles/200532077-Version-Control-with-Git-and-SVN). In practice, this means that the code used to automatically genereate student datasets and anwser keys is preserved online, and can be safely passed along from year to year thanks to version control. The GitHub environment is ideal for introducing new componenets and removing old ones from the code thanks to version control, and provides an effective frameowrk to ensure Experiment 1 can be readily changed in its future iterations. 
+
+
+
+
+
 
 ```{r bib, include=FALSE}
 # create a bib file for the R packages used in this document
